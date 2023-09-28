@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class BaseRepository<T> : IBaseRepository<T> where T : class, IDatabaseEntity
+    public class BaseRepository<T> : IBaseRepository<T> where T : DatabaseEntity
     {
         private readonly DataContext context;
 
