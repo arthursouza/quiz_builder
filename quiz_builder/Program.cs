@@ -1,4 +1,12 @@
+using ApplicationCore.Entities;
+using ApplicationCore.Repositories;
+using ApplicationCore.Services;
+using ApplicationCore.Validators;
+using Domain.Services;
+using FluentValidation;
 using Infrastructure;
+using Infrastructure.InfrastructureServices;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +29,11 @@ internal class Program
         builder.Services
             .AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<DataContext>();
+
+        builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+        builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IQuizService, QuizService>();
+        builder.Services.AddScoped<IValidator<Quiz>, QuizValidator>();
 
         builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

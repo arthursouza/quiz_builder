@@ -1,7 +1,7 @@
-﻿namespace ApplicationCore.Entities.Interfaces
+﻿namespace ApplicationCore.Entities.Common
 {
     public class DatabaseEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
     }
 }

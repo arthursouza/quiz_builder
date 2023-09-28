@@ -1,4 +1,4 @@
-﻿using ApplicationCore.Entities.Interfaces;
+﻿using ApplicationCore.Entities.Common;
 using ApplicationCore.Repositories;
 using ApplicationCore.Specifications;
 using Microsoft.EntityFrameworkCore;

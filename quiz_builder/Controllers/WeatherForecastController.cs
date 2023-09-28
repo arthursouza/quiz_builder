@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace quiz_builder.Controllers;
+namespace Api.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
