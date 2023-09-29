@@ -1,10 +1,15 @@
 ﻿using ApplicationCore.Entities;
+using ApplicationCore.Exceptions;
 using ApplicationCore.Models.Quiz;
+using ApplicationCore.Models.Quiz.Attempt;
+using ApplicationCore.Models.Quiz.View;
 using ApplicationCore.Repositories;
+using ApplicationCore.Services;
+using ApplicationCore.Specifications.Quizzes;
 using AutoMapper;
 using FluentValidation;
 
-namespace Domain.Services;
+namespace Infrastructure.InfrastructureServices;
 public class QuizService : IQuizService
 {
     private readonly IBaseRepository<Quiz> _repository;
@@ -26,41 +31,69 @@ public class QuizService : IQuizService
         var entity = _mapper.Map<Quiz>(model);
 
         var validationResult = _validator.Validate(entity);
-        //if (!validationResult.IsValid)
-        //{
-        //    throw new WorkItemValidationException(validationResult.Errors);
-        //}
+        if (!validationResult.IsValid)
+        {
+            throw new QuizValidationException(validationResult.Errors);
+        }
 
         entity.UserId = userId;
-        await _repository.AddAsync(entity);
 
+        await _repository.AddAsync(entity);
         _repository.Save();
 
         return entity.Id;
     }
 
-    public async Task UpdateAsync(QuizModel model, string userId)
+    public async Task UpdateAsync(UpdateQuizModel model, string userId)
     {
-        //var dbEntity = _repository.Queryable().FirstOrDefault(e => e.Id == model.Id && e.UserId == userId);
-        //if (dbEntity == null)
-        //{
-        //    throw new KeyNotFoundException();
-        //}
+        var databaseEntity = _repository
+            .Queryable(new QuizByIdAndUserSpecification(model.Id, userId))
+            .FirstOrDefault();
 
-        //var entity = _mapper.Map<WorkItem>(model);
-        //var validationResult = _validator.Validate(entity);
+        if (databaseEntity.Published)
+        {
+            throw new QuizValidationException("Unable to edit a published quiz");
+        }
+
+        var updatedEntity = _mapper.Map<Quiz>(model);
+
+        databaseEntity.Update(updatedEntity);
+
+        var validationResult = _validator.Validate(databaseEntity);
+        if (!validationResult.IsValid)
+        {
+            throw new QuizValidationException(validationResult.Errors);
+        }
+    }
+
+    public async Task AnswerAsync(QuizAttemptModel model, string userId)
+    {
+        var databaseEntity = _repository
+            .Queryable(new QuizByIdSpecification(model.Id))
+            .FirstOrDefault();
+
+        if (!databaseEntity.Published)
+        {
+            throw new QuizValidationException("Unable to answer an unpublished quiz");
+        }
+
+        //var updatedEntity = _mapper.Map<Quiz>(model);
+
+        //databaseEntity.Update(updatedEntity);
+
+        //var validationResult = _validator.Validate(databaseEntity);
         //if (!validationResult.IsValid)
         //{
-        //    throw new WorkItemValidationException(validationResult.Errors);
+        //    throw new QuizValidationException(validationResult.Errors);
         //}
-
-        //dbEntity.Update(entity);
-        //await _repository.AddOrUpdateAsync(dbEntity);
-        //_repository.Save();
     }
 
     public void Remove(Guid id, string userId)
     {
+        var databaseEntity = _repository
+            .Queryable(new QuizByIdAndUserSpecification(id, userId))
+            .FirstOrDefault();
+
         //var dbEntity = _repository.Queryable().FirstOrDefault(e => e.Id == id && e.UserId == userId);
         //if (dbEntity == null)
         //{
@@ -71,12 +104,12 @@ public class QuizService : IQuizService
         //_repository.Save();
     }
 
-    //public WorkItemModel Get(int id, string userId)
-    //{
-    //    return _mapper.Map<WorkItemModel>(_repository
-    //        .Queryable(false)
-    //        .FirstOrDefault(e => e.Id == id && e.UserId == userId));
-    //}
+    public ViewQuizModel Get(Guid id)
+    {
+        return _mapper.Map<ViewQuizModel>(_repository
+            .Queryable(new QuizByIdSpecification(id))
+            .FirstOrDefault());
+    }
 
     //public WorkItemModel[] GetAll(string userId)
     //{

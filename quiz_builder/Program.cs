@@ -1,8 +1,8 @@
+using Api.Configuration;
 using ApplicationCore.Entities;
 using ApplicationCore.Repositories;
 using ApplicationCore.Services;
 using ApplicationCore.Validators;
-using Domain.Services;
 using FluentValidation;
 using Infrastructure;
 using Infrastructure.InfrastructureServices;
@@ -21,7 +21,7 @@ internal class Program
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.ConfigureSwagger();
 
         builder.Services.AddDbContext<DataContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
@@ -29,6 +29,8 @@ internal class Program
         builder.Services
             .AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<DataContext>();
+
+        builder.Services.ConfigureAuthentication(builder.Configuration);
 
         builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
         builder.Services.AddScoped<IUserService, UserService>();

@@ -1,5 +1,5 @@
 using ApplicationCore.Models.Quiz;
-using Domain.Services;
+using ApplicationCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +8,7 @@ namespace Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("[controller]")]
-public class QuizController : Controller
+public class QuizController : ControllerBase
 {
     private readonly ILogger<QuizController> _logger;
     private readonly IQuizService _service;
@@ -24,7 +24,7 @@ public class QuizController : Controller
     {
         try
         {
-            var result = await _service.CreateAsync(model, GetUserId());
+            var result = await _service.CreateAsync(model, this.GetUserId());
             return Ok(result);
         }
         //catch (WorkItemValidationException ex)
@@ -39,11 +39,11 @@ public class QuizController : Controller
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update([FromBody] QuizModel model)
+    public async Task<IActionResult> Update([FromBody] UpdateQuizModel model)
     {
         try
         {
-            await _service.UpdateAsync(model, GetUserId());
+            await _service.UpdateAsync(model, this.GetUserId());
             return Ok();
         }
         catch (KeyNotFoundException)
@@ -66,7 +66,7 @@ public class QuizController : Controller
     {
         try
         {
-            _service.Remove(id, GetUserId());
+            _service.Remove(id, this.GetUserId());
             return Ok();
         }
         catch (KeyNotFoundException)
@@ -80,22 +80,22 @@ public class QuizController : Controller
         }
     }
 
-    //[HttpGet]
-    //public IActionResult Get(int id)
-    //{
-    //    try
-    //    {
-    //        var result = _service.Get(id, GetUserId());
-    //        if (result == null) return NotFound();
+    [HttpGet]
+    public IActionResult Get(Guid id)
+    {
+        try
+        {
+            var result = _service.Get(id);
+            if (result == null) return NotFound();
 
-    //        return Ok(result);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex.ToString());
-    //        return StatusCode(StatusCodes.Status500InternalServerError);
-    //    }
-    //}
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
 
     //[HttpGet("getall")]
     //public IActionResult GetAll()

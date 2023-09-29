@@ -1,11 +1,17 @@
 ﻿using ApplicationCore.Models.Quiz;
+using ApplicationCore.Models.Quiz.Attempt;
+using ApplicationCore.Models.Quiz.View;
 
-namespace Domain.Services;
+namespace ApplicationCore.Services;
 public interface IQuizService
 {
     Task<Guid> CreateAsync(QuizModel model, string userId);
 
-    Task UpdateAsync(QuizModel model, string userId);
+    Task UpdateAsync(UpdateQuizModel model, string userId);
+
+    Task AnswerAsync(QuizAttemptModel model, string userId);
 
     void Remove(Guid id, string userId);
+
+    ViewQuizModel Get(Guid id);
 }
