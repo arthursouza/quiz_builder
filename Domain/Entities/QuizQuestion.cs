@@ -3,7 +3,7 @@
 namespace ApplicationCore.Entities;
 public class QuizQuestion : DatabaseEntity
 {
-    public string Text { get; set; }
+    public string Question { get; set; }
 
     public Guid QuizId { get; set; }
     public Quiz Quiz { get; set; }
@@ -12,7 +12,7 @@ public class QuizQuestion : DatabaseEntity
 
     internal void Update(QuizQuestion quizQuestion)
     {
-        Text = quizQuestion.Text;
+        Question = quizQuestion.Question;
         UpdateAnswers(quizQuestion.Answers);
     }
 

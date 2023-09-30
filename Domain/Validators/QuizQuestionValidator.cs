@@ -8,7 +8,7 @@ public class QuizQuestionValidator : AbstractValidator<QuizQuestion>
 {
     public QuizQuestionValidator()
     {
-        RuleFor(x => x.Text).NotNull().Length(1, Constants.MaxTextLength)
+        RuleFor(x => x.Question).NotNull().Length(1, Constants.MaxTextLength)
             .WithMessage(e => $"Question text must be between 1 and 100 characters");
 
         RuleFor(x => x.Answers).NotNull();

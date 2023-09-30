@@ -9,4 +9,6 @@ public class QuizAttempt : DatabaseEntity
     public Quiz Quiz { get; set; }
 
     public float Score { get; set; }
+
+    public List<QuizAttemptAnswer> Answers { get; set; }
 }

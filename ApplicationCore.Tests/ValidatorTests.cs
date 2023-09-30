@@ -31,7 +31,7 @@ public class ValidatorTests
     {
         return new QuizAnswer()
         {
-            Text = "Answer text"
+            Answer = "Answer text"
         };
     }
 
@@ -39,7 +39,7 @@ public class ValidatorTests
     {
         return new QuizAnswer()
         {
-            Text = "Answer text",
+            Answer = "Answer text",
             Correct = true
         };
     }
@@ -48,7 +48,7 @@ public class ValidatorTests
     {
         return new QuizQuestion()
         {
-            Text = "Question text",
+            Question = "Question text",
             Answers = new List<QuizAnswer>()
             {
                 CreateValidAnswerIncorrect(),
@@ -179,7 +179,7 @@ public class ValidatorTests
     {
         var entity = CreateValidQuiz();
 
-        entity.Questions.First().Answers.First().Text = new string('a', Constants.MaxTextLength + 1);
+        entity.Questions.First().Answers.First().Answer = new string('a', Constants.MaxTextLength + 1);
 
         var response = _subject.Validate(entity);
         response.IsValid.Should().Be(false);
@@ -190,7 +190,7 @@ public class ValidatorTests
     {
         var entity = CreateValidQuiz();
 
-        entity.Questions.First().Text = new string('a', Constants.MaxTextLength + 1);
+        entity.Questions.First().Question = new string('a', Constants.MaxTextLength + 1);
 
         var response = _subject.Validate(entity);
         response.IsValid.Should().Be(false);

@@ -57,7 +57,8 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: true),
-                    UserId = table.Column<string>(type: "text", nullable: true)
+                    UserId = table.Column<string>(type: "text", nullable: true),
+                    Published = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -170,6 +171,90 @@ namespace Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "QuizAttempts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: true),
+                    QuizId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Score = table.Column<float>(type: "real", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuizAttempts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuizAttempts_Quizzes_QuizId",
+                        column: x => x.QuizId,
+                        principalTable: "Quizzes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuizQuestion",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Question = table.Column<string>(type: "text", nullable: true),
+                    QuizId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuizQuestion", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuizQuestion_Quizzes_QuizId",
+                        column: x => x.QuizId,
+                        principalTable: "Quizzes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuizAnswer",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Answer = table.Column<string>(type: "text", nullable: true),
+                    Correct = table.Column<bool>(type: "boolean", nullable: false),
+                    QuizQuestionId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuizAnswer", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuizAnswer_QuizQuestion_QuizQuestionId",
+                        column: x => x.QuizQuestionId,
+                        principalTable: "QuizQuestion",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuizAttemptAnswer",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    QuizAnswerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    QuizAttemptId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuizAttemptAnswer", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuizAttemptAnswer_QuizAnswer_QuizAnswerId",
+                        column: x => x.QuizAnswerId,
+                        principalTable: "QuizAnswer",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_QuizAttemptAnswer_QuizAttempts_QuizAttemptId",
+                        column: x => x.QuizAttemptId,
+                        principalTable: "QuizAttempts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -206,6 +291,31 @@ namespace Infrastructure.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuizAnswer_QuizQuestionId",
+                table: "QuizAnswer",
+                column: "QuizQuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuizAttemptAnswer_QuizAnswerId",
+                table: "QuizAttemptAnswer",
+                column: "QuizAnswerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuizAttemptAnswer_QuizAttemptId",
+                table: "QuizAttemptAnswer",
+                column: "QuizAttemptId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuizAttempts_QuizId",
+                table: "QuizAttempts",
+                column: "QuizId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuizQuestion_QuizId",
+                table: "QuizQuestion",
+                column: "QuizId");
         }
 
         /// <inheritdoc />
@@ -227,13 +337,25 @@ namespace Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Quizzes");
+                name: "QuizAttemptAnswer");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "QuizAnswer");
+
+            migrationBuilder.DropTable(
+                name: "QuizAttempts");
+
+            migrationBuilder.DropTable(
+                name: "QuizQuestion");
+
+            migrationBuilder.DropTable(
+                name: "Quizzes");
         }
     }
 }

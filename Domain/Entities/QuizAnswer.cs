@@ -3,16 +3,16 @@
 namespace ApplicationCore.Entities;
 public class QuizAnswer : DatabaseEntity
 {
-    public string Text { get; set; }
+    public string Answer { get; set; }
+
+    public bool Correct { get; set; }
 
     public Guid QuizQuestionId { get; set; }
     public QuizQuestion QuizQuestion { get; set; }
 
-    public bool Correct { get; set; }
-
     internal void Update(QuizAnswer quizAnswer)
     {
-        Text = quizAnswer.Text;
+        Answer = quizAnswer.Answer;
         Correct = quizAnswer.Correct;
     }
 }

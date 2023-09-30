@@ -3,10 +3,9 @@
 namespace ApplicationCore.Entities;
 public class QuizAttemptAnswer : DatabaseEntity
 {
-    public string Text { get; set; }
+    public Guid QuizAnswerId { get; set; }
+    public QuizAnswer QuizAnswer { get; set; }
 
-    public Guid QuizQuestionId { get; set; }
-    public QuizQuestion QuizQuestion { get; set; }
-
-    public bool Correct { get; set; }
+    public Guid QuizAttemptId { get; set; }
+    public QuizAttempt QuizAttempt { get; set; }
 }

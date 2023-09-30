@@ -5,6 +5,7 @@ using ApplicationCore.Models.Quiz.Attempt;
 using ApplicationCore.Models.Quiz.View;
 using ApplicationCore.Repositories;
 using ApplicationCore.Services;
+using ApplicationCore.Specifications.QuizAttempts;
 using ApplicationCore.Specifications.Quizzes;
 using AutoMapper;
 using FluentValidation;
@@ -12,18 +13,21 @@ using FluentValidation;
 namespace Infrastructure.InfrastructureServices;
 public class QuizService : IQuizService
 {
-    private readonly IBaseRepository<Quiz> _repository;
+    private readonly IBaseRepository<Quiz> _quizRepository;
+    private readonly IBaseRepository<QuizAttempt> _quizAttemptRepository;
     private readonly IValidator<Quiz> _validator;
     private readonly IMapper _mapper;
 
     public QuizService(
-        IBaseRepository<Quiz> repository,
+        IBaseRepository<Quiz> quizRepository,
+        IBaseRepository<QuizAttempt> quizAttemptRepository,
         IValidator<Quiz> validator,
         IMapper mapper)
     {
-        _repository = repository;
+        _quizRepository = quizRepository;
         _validator = validator;
         _mapper = mapper;
+        _quizAttemptRepository = quizAttemptRepository;
     }
 
     public async Task<Guid> CreateAsync(QuizModel model, string userId)
@@ -38,15 +42,15 @@ public class QuizService : IQuizService
 
         entity.UserId = userId;
 
-        await _repository.AddAsync(entity);
-        _repository.Save();
+        await _quizRepository.AddAsync(entity);
+        _quizRepository.Save();
 
         return entity.Id;
     }
 
     public async Task UpdateAsync(UpdateQuizModel model, string userId)
     {
-        var databaseEntity = _repository
+        var databaseEntity = _quizRepository
             .Queryable(new QuizByIdAndUserSpecification(model.Id, userId))
             .FirstOrDefault();
 
@@ -68,8 +72,8 @@ public class QuizService : IQuizService
 
     public async Task AnswerAsync(QuizAttemptModel model, string userId)
     {
-        var databaseEntity = _repository
-            .Queryable(new QuizByIdSpecification(model.Id))
+        var databaseEntity = _quizRepository
+            .Queryable(new QuizByIdSpecification(model.QuizId))
             .FirstOrDefault();
 
         if (!databaseEntity.Published)
@@ -77,20 +81,26 @@ public class QuizService : IQuizService
             throw new QuizValidationException("Unable to answer an unpublished quiz");
         }
 
-        //var updatedEntity = _mapper.Map<Quiz>(model);
+        var currentAttempt = _quizAttemptRepository
+            .Queryable(new QuizAttemptByIdAndUserSpecification(model.QuizId, userId))
+            .FirstOrDefault();
 
-        //databaseEntity.Update(updatedEntity);
+        if (currentAttempt != null)
+        {
+            throw new QuizValidationException("You have already answered this quiz");
+        }
 
-        //var validationResult = _validator.Validate(databaseEntity);
-        //if (!validationResult.IsValid)
-        //{
-        //    throw new QuizValidationException(validationResult.Errors);
-        //}
+        var attempt = _mapper.Map<QuizAttempt>(model);
+
+        // Validate at least one answer
+
+        await _quizAttemptRepository.AddAsync(attempt);
+        _quizAttemptRepository.Save();
     }
 
     public void Remove(Guid id, string userId)
     {
-        var databaseEntity = _repository
+        var databaseEntity = _quizRepository
             .Queryable(new QuizByIdAndUserSpecification(id, userId))
             .FirstOrDefault();
 
@@ -106,7 +116,7 @@ public class QuizService : IQuizService
 
     public ViewQuizModel Get(Guid id)
     {
-        return _mapper.Map<ViewQuizModel>(_repository
+        return _mapper.Map<ViewQuizModel>(_quizRepository
             .Queryable(new QuizByIdSpecification(id))
             .FirstOrDefault());
     }

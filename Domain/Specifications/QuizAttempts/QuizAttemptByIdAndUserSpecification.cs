@@ -1,6 +1,6 @@
 ﻿using ApplicationCore.Entities;
 
-namespace ApplicationCore.Specifications.Quizzes;
+namespace ApplicationCore.Specifications.QuizAttempts;
 
 public class QuizAttemptByIdAndUserSpecification : BaseSpecification<QuizAttempt>
 {

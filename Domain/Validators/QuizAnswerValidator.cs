@@ -8,6 +8,6 @@ public class QuizAnswerValidator : AbstractValidator<QuizAnswer>
 {
     public QuizAnswerValidator()
     {
-        RuleFor(x => x.Text).NotNull().Length(1, Constants.MaxTextLength);
+        RuleFor(x => x.Answer).NotNull().Length(1, Constants.MaxTextLength);
     }
 }

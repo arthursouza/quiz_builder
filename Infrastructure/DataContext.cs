@@ -10,7 +10,8 @@
     {
         protected readonly IConfiguration Configuration;
 
-        private DbSet<QuizQuestion> Quizzes { get; set; }
+        private DbSet<Quiz> Quizzes { get; set; }
+        private DbSet<QuizAttempt> QuizAttempts { get; set; }
 
         public DataContext(IConfiguration configuration)
         {

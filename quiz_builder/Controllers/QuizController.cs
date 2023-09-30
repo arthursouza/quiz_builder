@@ -1,4 +1,6 @@
+using ApplicationCore.Exceptions;
 using ApplicationCore.Models.Quiz;
+using ApplicationCore.Models.Quiz.Attempt;
 using ApplicationCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,10 +29,10 @@ public class QuizController : ControllerBase
             var result = await _service.CreateAsync(model, this.GetUserId());
             return Ok(result);
         }
-        //catch (WorkItemValidationException ex)
-        //{
-        //    return BadRequest(ex.Message);
-        //}
+        catch (QuizValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex.ToString());
@@ -50,10 +52,10 @@ public class QuizController : ControllerBase
         {
             return NotFound();
         }
-        //catch (WorkItemValidationException ex)
-        //{
-        //    return BadRequest(ex.Message);
-        //}
+        catch (QuizValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex.ToString());
@@ -97,17 +99,23 @@ public class QuizController : ControllerBase
         }
     }
 
-    //[HttpGet("getall")]
-    //public IActionResult GetAll()
-    //{
-    //    try
-    //    {
-    //        return Ok(_service.GetAll(GetUserId()));
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex.ToString());
-    //        return StatusCode(StatusCodes.Status500InternalServerError);
-    //    }
-    //}
+    [HttpPost]
+    [Route("answer")]
+    public async Task<IActionResult> Answer([FromBody] QuizAttemptModel model)
+    {
+        try
+        {
+            await _service.AnswerAsync(model, this.GetUserId());
+            return Ok();
+        }
+        catch (QuizValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
 }
