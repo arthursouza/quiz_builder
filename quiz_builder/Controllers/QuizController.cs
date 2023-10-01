@@ -160,7 +160,7 @@ public class QuizController : ControllerBase
 
     [HttpGet]
     [Route("getmyattempts")]
-    public IActionResult GetMyAttempts()
+    public IActionResult GetMyAttempts(int page = 0, int size = 0)
     {
         try
         {
@@ -175,7 +175,7 @@ public class QuizController : ControllerBase
 
     [HttpGet]
     [Route("getattempts")]
-    public IActionResult GetAttempts(Guid id)
+    public IActionResult GetAttempts(Guid id, int page = 0, int size = 0)
     {
         try
         {
