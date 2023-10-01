@@ -5,5 +5,5 @@ public class ViewQuizModel
 
     public string Title { get; set; }
 
-    public IList<QuizQuestionModel> Questions { get; set; }
+    public IList<ViewQuizQuestionModel> Questions { get; set; }
 }

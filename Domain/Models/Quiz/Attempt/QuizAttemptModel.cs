@@ -3,5 +3,5 @@ public class QuizAttemptModel
 {
     public Guid QuizId { get; set; }
 
-    public IList<Guid> SelectedAnswers { get; set; }
+    public IList<QuizAnswerAttemptModel> Answers { get; set; }
 }

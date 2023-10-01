@@ -12,6 +12,10 @@ public class QuizValidator : AbstractValidator<Quiz>
 
         RuleFor(x => x.Questions).NotNull();
 
+        RuleFor(x => x.Published)
+            .Must(published => published == false)
+            .WithMessage("Unable to edit a published quiz");
+
         RuleFor(e => e.Questions)
             .Must(e => e.Count > 0 && e.Count <= Constants.MaxQuestionsPerQuiz)
             .When(e => e.Questions != null)

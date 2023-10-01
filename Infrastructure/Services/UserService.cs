@@ -9,7 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Infrastructure.InfrastructureServices;
+namespace Infrastructure.Services;
 public class UserService : IUserService
 {
     private readonly UserManager<IdentityUser> _userManager;

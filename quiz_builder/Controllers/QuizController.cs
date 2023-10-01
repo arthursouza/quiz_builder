@@ -41,11 +41,11 @@ public class QuizController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update([FromBody] UpdateQuizModel model)
+    public IActionResult Update([FromBody] UpdateQuizModel model)
     {
         try
         {
-            await _service.UpdateAsync(model, this.GetUserId());
+            _service.Update(model, this.GetUserId());
             return Ok();
         }
         catch (KeyNotFoundException)
@@ -82,6 +82,22 @@ public class QuizController : ControllerBase
         }
     }
 
+
+    [HttpGet]
+    [Route("getall")]
+    public IActionResult Get()
+    {
+        try
+        {
+            return Ok(_service.GetAll(this.GetUserId()));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
     [HttpGet]
     public IActionResult Get(Guid id)
     {
@@ -106,6 +122,27 @@ public class QuizController : ControllerBase
         try
         {
             await _service.AnswerAsync(model, this.GetUserId());
+            return Ok();
+        }
+        catch (QuizValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+
+    [HttpPost]
+    [Route("publish")]
+    public IActionResult Publish([FromBody] Guid id)
+    {
+        try
+        {
+            _service.Publish(id, this.GetUserId());
             return Ok();
         }
         catch (QuizValidationException ex)

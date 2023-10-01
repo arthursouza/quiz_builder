@@ -1,4 +1,4 @@
-﻿namespace ApplicationCore.Models.Quiz;
+﻿namespace ApplicationCore.Models.Quiz.View;
 public class ViewQuizQuestionModel
 {
     public Guid? Id { get; set; }
