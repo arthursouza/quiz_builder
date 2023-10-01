@@ -143,6 +143,10 @@ public class QuizController : ControllerBase
             _service.Publish(id, this.GetUserId());
             return Ok();
         }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
         catch (QuizValidationException ex)
         {
             return BadRequest(ex.Message);
@@ -153,7 +157,6 @@ public class QuizController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
-
 
     [HttpGet]
     [Route("getmyattempts")]

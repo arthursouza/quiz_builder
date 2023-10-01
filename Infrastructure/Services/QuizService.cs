@@ -160,6 +160,8 @@ public class QuizService : IQuizService
             .Queryable(new QuizByIdAndUserSpecification(id, userId))
             .FirstOrDefault();
 
+        if (databaseEntity == null) throw new KeyNotFoundException();
+
         var validationResult = _validator.Validate(databaseEntity);
         if (!validationResult.IsValid)
         {
