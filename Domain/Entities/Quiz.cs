@@ -1,10 +1,12 @@
 ﻿using ApplicationCore.Entities.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace ApplicationCore.Entities;
 public class Quiz : DatabaseEntity
 {
     public string Title { get; set; }
 
+    [Required]
     public string UserId { get; set; }
 
     public bool Published { get; set; }

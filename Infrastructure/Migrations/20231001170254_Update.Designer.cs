@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230930005510_Base")]
-    partial class Base
+    [Migration("20231001170254_Update")]
+    partial class Update
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,6 +38,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -67,6 +68,30 @@ namespace Infrastructure.Migrations
                     b.ToTable("QuizAnswer");
                 });
 
+            modelBuilder.Entity("ApplicationCore.Entities.QuizAnswerAttempt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("QuizAnswerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<float>("Score")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("QuizAnswerId");
+
+                    b.ToTable("QuizAnswerAttempt");
+                });
+
             modelBuilder.Entity("ApplicationCore.Entities.QuizAttempt", b =>
                 {
                     b.Property<Guid>("Id")
@@ -80,6 +105,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("real");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -87,27 +113,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("QuizId");
 
                     b.ToTable("QuizAttempts");
-                });
-
-            modelBuilder.Entity("ApplicationCore.Entities.QuizAttemptAnswer", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("QuizAnswerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("QuizAttemptId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("QuizAnswerId");
-
-                    b.HasIndex("QuizAttemptId");
-
-                    b.ToTable("QuizAttemptAnswer");
                 });
 
             modelBuilder.Entity("ApplicationCore.Entities.QuizQuestion", b =>
@@ -127,6 +132,30 @@ namespace Infrastructure.Migrations
                     b.HasIndex("QuizId");
 
                     b.ToTable("QuizQuestion");
+                });
+
+            modelBuilder.Entity("ApplicationCore.Entities.QuizQuestionAttempt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("QuizAttemptId")
+                        .HasColumnType("uuid");
+
+                    b.Property<float>("Score")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("QuizAttemptId");
+
+                    b.ToTable("QuizQuestionAttempt");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -336,6 +365,25 @@ namespace Infrastructure.Migrations
                     b.Navigation("QuizQuestion");
                 });
 
+            modelBuilder.Entity("ApplicationCore.Entities.QuizAnswerAttempt", b =>
+                {
+                    b.HasOne("ApplicationCore.Entities.QuizQuestionAttempt", "Question")
+                        .WithMany("Answers")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ApplicationCore.Entities.QuizAnswer", "QuizAnswer")
+                        .WithMany()
+                        .HasForeignKey("QuizAnswerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("QuizAnswer");
+                });
+
             modelBuilder.Entity("ApplicationCore.Entities.QuizAttempt", b =>
                 {
                     b.HasOne("ApplicationCore.Entities.Quiz", "Quiz")
@@ -347,25 +395,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Quiz");
                 });
 
-            modelBuilder.Entity("ApplicationCore.Entities.QuizAttemptAnswer", b =>
-                {
-                    b.HasOne("ApplicationCore.Entities.QuizAnswer", "QuizAnswer")
-                        .WithMany()
-                        .HasForeignKey("QuizAnswerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ApplicationCore.Entities.QuizAttempt", "QuizAttempt")
-                        .WithMany("Answers")
-                        .HasForeignKey("QuizAttemptId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("QuizAnswer");
-
-                    b.Navigation("QuizAttempt");
-                });
-
             modelBuilder.Entity("ApplicationCore.Entities.QuizQuestion", b =>
                 {
                     b.HasOne("ApplicationCore.Entities.Quiz", "Quiz")
@@ -375,6 +404,21 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("ApplicationCore.Entities.QuizQuestionAttempt", b =>
+                {
+                    b.HasOne("ApplicationCore.Entities.QuizQuestion", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ApplicationCore.Entities.QuizAttempt", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("QuizAttemptId");
+
+                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -435,10 +479,15 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("ApplicationCore.Entities.QuizAttempt", b =>
                 {
-                    b.Navigation("Answers");
+                    b.Navigation("Questions");
                 });
 
             modelBuilder.Entity("ApplicationCore.Entities.QuizQuestion", b =>
+                {
+                    b.Navigation("Answers");
+                });
+
+            modelBuilder.Entity("ApplicationCore.Entities.QuizQuestionAttempt", b =>
                 {
                     b.Navigation("Answers");
                 });

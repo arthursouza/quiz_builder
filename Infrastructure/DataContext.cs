@@ -26,6 +26,18 @@
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Quiz>()
+                .HasMany(q => q.Questions)
+                .WithOne(q => q.Quiz)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<QuizQuestion>()
+                .HasMany(q => q.Answers)
+                .WithOne(q => q.QuizQuestion)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
         }
     }
 }

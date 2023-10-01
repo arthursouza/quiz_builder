@@ -6,6 +6,6 @@ public class QuizByIdSpecification : BaseSpecification<Quiz>
     public QuizByIdSpecification(Guid quizId)
         : base(e => e.Id == quizId)
     {
-        AddInclude("Questions.Answers");
+        AddInclude($"{nameof(Quiz.Questions)}.{nameof(QuizQuestion.Answers)}");
     }
 }

@@ -1,8 +1,10 @@
 ﻿using ApplicationCore.Entities.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace ApplicationCore.Entities;
 public class QuizAttempt : DatabaseEntity
 {
+    [Required]
     public string UserId { get; set; }
 
     public Guid QuizId { get; set; }
@@ -10,5 +12,5 @@ public class QuizAttempt : DatabaseEntity
 
     public float Score { get; set; }
 
-    public List<QuizAttemptAnswer> Answers { get; set; }
+    public List<QuizQuestionAttempt> Questions { get; set; }
 }

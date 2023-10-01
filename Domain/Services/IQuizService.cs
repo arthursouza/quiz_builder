@@ -18,4 +18,8 @@ public interface IQuizService
     IList<UpdateQuizModel> GetAll(string userId);
 
     void Publish(Guid id, string userId);
+
+    IList<ViewAttemptModel> GetAllAttempts(string userId);
+
+    IList<ViewAttemptModel> GetAllAttempts(Guid id, string userId);
 }

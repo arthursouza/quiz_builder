@@ -19,6 +19,11 @@ namespace Infrastructure.Repositories
             context.Entry(entity).State = EntityState.Modified;
         }
 
+        public void Remove(params T[] entity)
+        {
+            context.Set<T>().RemoveRange(entity);
+        }
+
         public async Task AddAsync(T entity)
         {
             await context.Set<T>().AddAsync(entity);

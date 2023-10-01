@@ -10,6 +10,8 @@ namespace ApplicationCore.Repositories
 
         void Save();
 
+        void Remove(params T[] entity);
+
         IEnumerable<T> Queryable(ISpecification<T> spec, bool tracking = false);
     }
 }

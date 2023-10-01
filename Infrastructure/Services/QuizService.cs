@@ -5,6 +5,7 @@ using ApplicationCore.Models.Quiz.Attempt;
 using ApplicationCore.Models.Quiz.View;
 using ApplicationCore.Repositories;
 using ApplicationCore.Services;
+using ApplicationCore.Specifications.QuizAttempts;
 using ApplicationCore.Specifications.Quizzes;
 using AutoMapper;
 using FluentValidation;
@@ -36,14 +37,13 @@ public class QuizService : IQuizService
     public async Task<Guid> CreateAsync(QuizModel model, string userId)
     {
         var entity = _mapper.Map<Quiz>(model);
+        entity.UserId = userId;
 
         var validationResult = _validator.Validate(entity);
         if (!validationResult.IsValid)
         {
             throw new QuizValidationException(validationResult.Errors);
         }
-
-        entity.UserId = userId;
 
         await _quizRepository.AddAsync(entity);
         _quizRepository.Save();
@@ -56,6 +56,9 @@ public class QuizService : IQuizService
         var databaseEntity = _quizRepository
             .Queryable(new QuizByIdAndUserSpecification(model.Id, userId))
             .FirstOrDefault();
+
+        if (databaseEntity == null)
+            throw new KeyNotFoundException();
 
         var updatedEntity = _mapper.Map<Quiz>(model);
 
@@ -74,6 +77,7 @@ public class QuizService : IQuizService
     public async Task AnswerAsync(QuizAttemptModel model, string userId)
     {
         var attempt = _mapper.Map<QuizAttempt>(model);
+        attempt.UserId = userId;
 
         var validationResult = _quizAttemptValidator.Validate(attempt);
 
@@ -82,24 +86,58 @@ public class QuizService : IQuizService
             throw new QuizValidationException(validationResult.Errors);
         }
 
+        CalculateScore(attempt);
+
         await _quizAttemptRepository.AddAsync(attempt);
         _quizAttemptRepository.Save();
     }
 
+    private void CalculateScore(QuizAttempt attempt)
+    {
+        if (!attempt.Questions.Any()) return;
+
+        var quiz = _quizRepository.Queryable(new QuizByIdSpecification(attempt.QuizId)).First();
+
+        foreach (var question in quiz.Questions)
+        {
+            var questionAttempt = attempt.Questions.FirstOrDefault(q => q.QuestionId == question.Id);
+            if (questionAttempt == null) continue;
+
+            var answers = question.Answers.Where(a => a.Correct).Select(a => a.Id).ToList();
+
+            var selectedAnswers = questionAttempt.Answers.Select(a => a.QuizAnswerId).ToList();
+
+            var correctChoices = selectedAnswers.Count(a => answers.Contains(a));
+            var incorrectChoices = selectedAnswers.Count(a => !answers.Contains(a));
+
+            var correctWeight = (float)1f / answers.Count();
+            var wrongWeight = (float)1f / (question.Answers.Count() - answers.Count());
+
+            questionAttempt.Score = (correctChoices * correctWeight + incorrectChoices * wrongWeight * -1) * 100f;
+        }
+
+        attempt.Score = Math.Max(0, attempt.Questions.Sum(q => q.Score) / quiz.Questions.Count);
+    }
+
     public void Remove(Guid id, string userId)
     {
-        var databaseEntity = _quizRepository
+        var quiz = _quizRepository
             .Queryable(new QuizByIdAndUserSpecification(id, userId))
             .FirstOrDefault();
 
-        //var dbEntity = _repository.Queryable().FirstOrDefault(e => e.Id == id && e.UserId == userId);
-        //if (dbEntity == null)
-        //{
-        //    throw new KeyNotFoundException();
-        //}
+        if (quiz == null)
+        {
+            throw new KeyNotFoundException();
+        }
 
-        //_repository.Remove(dbEntity);
-        //_repository.Save();
+        _quizRepository.Remove(quiz);
+        _quizRepository.Save();
+
+        //var attempts = _quizAttemptRepository.Queryable(new AttemptsByQuizSpecification(id)).ToList();
+        //if (!attempts.Any()) return;
+
+        //_quizAttemptRepository.Remove(attempts.ToArray());
+        //_quizAttemptRepository.Save();
     }
 
     public ViewQuizModel Get(Guid id)
@@ -134,12 +172,17 @@ public class QuizService : IQuizService
         _quizRepository.Save();
     }
 
-    //public WorkItemModel[] GetAll(string userId)
-    //{
-    //    return _mapper.Map<WorkItemModel[]>(_repository
-    //        .Queryable(false)
-    //        .Where(e => e.UserId == userId)
-    //        .OrderBy(e => e.Id)
-    //        .ToArray());
-    //}
+    public IList<ViewAttemptModel> GetAllAttempts(string userId)
+    {
+        return _mapper.Map<IList<ViewAttemptModel>>(_quizAttemptRepository
+            .Queryable(new AttemptsByUserSpecification(userId))
+            .ToList());
+    }
+
+    public IList<ViewAttemptModel> GetAllAttempts(Guid id, string userId)
+    {
+        return _mapper.Map<IList<ViewAttemptModel>>(_quizAttemptRepository
+            .Queryable(new AttemptsForQuizOwnedByUserSpecification(id, userId))
+            .ToList());
+    }
 }

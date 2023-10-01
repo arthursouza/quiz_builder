@@ -82,7 +82,6 @@ public class QuizController : ControllerBase
         }
     }
 
-
     [HttpGet]
     [Route("getall")]
     public IActionResult Get()
@@ -135,7 +134,6 @@ public class QuizController : ControllerBase
         }
     }
 
-
     [HttpPost]
     [Route("publish")]
     public IActionResult Publish([FromBody] Guid id)
@@ -155,4 +153,36 @@ public class QuizController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
+
+
+    [HttpGet]
+    [Route("getmyattempts")]
+    public IActionResult GetMyAttempts()
+    {
+        try
+        {
+            return Ok(_service.GetAllAttempts(this.GetUserId()));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpGet]
+    [Route("getattempts")]
+    public IActionResult GetAttempts(Guid id)
+    {
+        try
+        {
+            return Ok(_service.GetAllAttempts(id, this.GetUserId()));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
 }
