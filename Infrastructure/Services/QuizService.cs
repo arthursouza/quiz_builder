@@ -1,4 +1,5 @@
-﻿using ApplicationCore.Entities;
+﻿using ApplicationCore.Configurations;
+using ApplicationCore.Entities;
 using ApplicationCore.Exceptions;
 using ApplicationCore.Models.Quiz;
 using ApplicationCore.Models.Quiz.Attempt;
@@ -174,15 +175,33 @@ public class QuizService : IQuizService
         _quizRepository.Save();
     }
 
-    public IList<ViewAttemptModel> GetAllAttempts(string userId)
+    public IList<ViewAttemptModel> GetAllAttempts(string userId, int? page = null, int? size = null)
     {
+        if (page.HasValue || size.HasValue)
+        {
+            return _mapper.Map<IList<ViewAttemptModel>>(_quizAttemptRepository
+                .Queryable(new AttemptsByUserSpecification(userId))
+                .Skip((page - 1) * (size ?? Constants.DefaultApiPageSize) ?? 0)
+                .Take(size ?? Constants.DefaultApiPageSize)
+                .ToList());
+        }
+
         return _mapper.Map<IList<ViewAttemptModel>>(_quizAttemptRepository
             .Queryable(new AttemptsByUserSpecification(userId))
             .ToList());
     }
 
-    public IList<ViewAttemptModel> GetAllAttempts(Guid id, string userId)
+    public IList<ViewAttemptModel> GetAllAttempts(Guid id, string userId, int? page = null, int? size = null)
     {
+        if (page.HasValue || size.HasValue)
+        {
+            return _mapper.Map<IList<ViewAttemptModel>>(_quizAttemptRepository
+                .Queryable(new AttemptsForQuizOwnedByUserSpecification(id, userId))
+                .Skip((page - 1) * (size ?? Constants.DefaultApiPageSize) ?? 0)
+                .Take(size ?? Constants.DefaultApiPageSize)
+                .ToList());
+        }
+
         return _mapper.Map<IList<ViewAttemptModel>>(_quizAttemptRepository
             .Queryable(new AttemptsForQuizOwnedByUserSpecification(id, userId))
             .ToList());

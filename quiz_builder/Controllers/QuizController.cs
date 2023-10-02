@@ -164,7 +164,7 @@ public class QuizController : ControllerBase
     {
         try
         {
-            return Ok(_service.GetAllAttempts(this.GetUserId()));
+            return Ok(_service.GetAllAttempts(this.GetUserId(), page, size));
         }
         catch (Exception ex)
         {
@@ -179,7 +179,7 @@ public class QuizController : ControllerBase
     {
         try
         {
-            return Ok(_service.GetAllAttempts(id, this.GetUserId()));
+            return Ok(_service.GetAllAttempts(id, this.GetUserId(), page, size));
         }
         catch (Exception ex)
         {

@@ -10,8 +10,8 @@
     {
         protected readonly IConfiguration Configuration;
 
-        private DbSet<Quiz> Quizzes { get; set; }
-        private DbSet<QuizAttempt> QuizAttempts { get; set; }
+        private DbSet<Quiz> Quiz { get; set; }
+        private DbSet<QuizAttempt> QuizAttempt { get; set; }
 
         public DataContext(IConfiguration configuration)
         {
@@ -27,15 +27,15 @@
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Quiz>()
-                .HasMany(q => q.Questions)
-                .WithOne(q => q.Quiz)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<Quiz>()
+            //    .HasMany(q => q.Questions)
+            //    .WithOne(q => q.Quiz)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<QuizQuestion>()
-                .HasMany(q => q.Answers)
-                .WithOne(q => q.QuizQuestion)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<QuizQuestion>()
+            //    .HasMany(q => q.Answers)
+            //    .WithOne(q => q.QuizQuestion)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
 
         }

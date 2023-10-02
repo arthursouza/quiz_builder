@@ -19,7 +19,7 @@ public interface IQuizService
 
     void Publish(Guid id, string userId);
 
-    IList<ViewAttemptModel> GetAllAttempts(string userId);
+    IList<ViewAttemptModel> GetAllAttempts(string userId, int? page = null, int? size = null);
 
-    IList<ViewAttemptModel> GetAllAttempts(Guid id, string userId);
+    IList<ViewAttemptModel> GetAllAttempts(Guid id, string userId, int? page = null, int? size = null);
 }
